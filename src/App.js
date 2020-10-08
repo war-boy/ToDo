@@ -41,8 +41,20 @@ export default class App extends Component {
       < ToDoRow
         key={y.action} //action property of todoItems
         oneMappedItem={y} //entire todoItems
+        callback = {this.toggleToDoFunction}
       />
     );
+
+    // the toggleToDoFunction is the callback function of the <ToDoRow> component.
+    // This function receives the value or object that is passed into the callack property of <ToDoRow>
+    // This passed data is being called "myToggledItem"
+    // The gist of the function is to flip the "done" property of the todo item from false to true OR true to false depending on what it's current state is
+    //  When setState() is invoked, React will make a new object with the changes.  Under the hood React will compare the new object with the DOM version of the object.  If there is a difference between those 2 objects then the DOM will get re-drawn (NOT a reload, faster) and then we see the changes.
+    toggleToDoFunction = (myToggledItem) => this.setState({
+      todoItems: this.state.todoItems.map(
+        x => x.action === myToggledItem.action ? {...x, done: !x.done} : x//is the action we are targeting the one that was changed? if so return the done property to what it NOT is. If not, just return the action since it's looking through all of them (...x)
+      )
+    })
 
   render = () =>
     <div>
