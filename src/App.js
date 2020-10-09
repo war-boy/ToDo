@@ -4,8 +4,10 @@ import './App.css';
 import { ToDoBanner } from './ToDoBannerFile'
 import { ToDoRow } from './ToDoRowFile';
 import { VisibilityControl } from './VisibilityControl';
+import { ToDoCreator } from './ToDoCreator';
 import 'bootstrap/dist/css/bootstrap.css';
 
+//**** () => localStorage.setItem("storedTodos", JSON.stringify(this.state)) **** Generic template
 
 // The App class below is the default Compnent for out todo app
 export default class App extends Component {
@@ -57,7 +59,39 @@ export default class App extends Component {
     todoItems: this.state.todoItems.map(
       x => x.action === myToggledItem.action ? { ...x, done: !x.done } : x//is the action we are targeting the one that was changed? if so return the done property to what it NOT is. If not, just return the action since it's looking through all of them (...x)
     )
-  })
+  }, () => localStorage.setItem("storedTodos", JSON.stringify(this.state)));
+
+  //  The createNewTodoCallback method below is the callback for the ToDoCreator component
+  //  The "newToDo" parameter passed into the createNewTodoCallback method below comes from where the callback it initiated from (created on the fly) - which is in the createNewTodo method of the ToDoCreator Component
+  createNewToDoCallback = (newToDo) => {
+    //  The if block below checks if the newly created todo item is NOT already in the list of todos.  If it is NOT already in the list then it adds it as below.  If it is in the list already there is no else block so nothing happens - this is not to user friendly but.... :)
+    if (!this.state.todoItems.find(x => x.action === this.state.newToDo)) {
+      this.setState({
+        todoItems: [
+          ...this.state.todoItems, { action: newToDo, done: false }
+          // By default every new todo should not be done- in other words it's done property should have a value of false
+          // ...this.state.todoItems brings in all of the todoItems from state and ,{action: newToDo, done: false} adds out new to do item
+        ]},
+       () => localStorage.setItem("storedTodos", JSON.stringify(this.state))
+      );//end of set state
+    }//end of if block
+  }
+
+  //  The componentDidMount method below is a built in react method to handle logic for when the app "mounts" or "loads"
+  //  The localStorage object is a React built in object that allows persistent local storage much like how cookies work
+  //  localStorage reference: https://programmingwithmosh.com/react/localstorage-react/
+  componentDidMount = () => {
+    let storedData = localStorage.getItem("storedTodos")
+    this.setState(
+      storedData != null ? JSON.parse(storedData) : {
+        userName: "Billy Bob", //this is essentially the default view since we don't have any local storage until we add some.
+        todoItems: [
+          { action: "Move to firepit", done: false },
+        ],
+        showCompleted: true
+      }
+    );
+  }
 
   render = () =>
     <div>
@@ -66,6 +100,11 @@ export default class App extends Component {
       <ToDoBanner
         userName={this.state.userName}
         todoItems={this.state.todoItems}
+      />
+
+      {/* Feature 5A */}
+      <ToDoCreator
+        callback={this.createNewToDoCallback}
       />
 
       {/* Features 3 & 4 */}
